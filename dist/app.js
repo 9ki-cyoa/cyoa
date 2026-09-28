@@ -28,13 +28,19 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const loadingTrack = document.querySelector(".loading-track");
 const loadingBar = document.querySelector(".loading-bar");
 const loadingPercent = document.querySelector(".loading-percent");
-const requiredAssets = ["./assets/images/title-screen.png"];
+const titleBgm = document.querySelector("#title-bgm");
+const audioToggle = document.querySelector('[data-action="toggle-audio"]');
+const audioLabel = document.querySelector(".audio-label");
+const requiredImages = ["./assets/images/title-screen.png"];
 
 let currentLine = 0;
 let visibleText = "";
 let typeTimer;
 let statusTimer;
 let isTyping = false;
+let musicEnabled = true;
+
+titleBgm.volume = 0.46;
 
 function showScreen(name) {
   screens.forEach((screen) => {
@@ -42,6 +48,38 @@ function showScreen(name) {
     screen.hidden = !isTarget;
     screen.classList.toggle("is-active", isTarget);
   });
+
+  if (name === "title") {
+    playTitleMusic();
+  } else {
+    stopTitleMusic();
+  }
+}
+
+function updateAudioControl(isPlaying) {
+  audioToggle.setAttribute("aria-pressed", String(isPlaying));
+  audioToggle.classList.toggle("is-playing", isPlaying);
+  audioLabel.textContent = isPlaying ? "BGM 끄기" : "BGM 재생";
+}
+
+async function playTitleMusic() {
+  if (!musicEnabled) {
+    updateAudioControl(false);
+    return;
+  }
+
+  try {
+    await titleBgm.play();
+    updateAudioControl(true);
+  } catch {
+    updateAudioControl(false);
+  }
+}
+
+function stopTitleMusic() {
+  titleBgm.pause();
+  titleBgm.currentTime = 0;
+  updateAudioControl(false);
 }
 
 function updateLoadingProgress(value) {
@@ -68,6 +106,30 @@ function preloadImage(source) {
   });
 }
 
+function prepareAudio(audio) {
+  return new Promise((resolve, reject) => {
+    if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      resolve();
+      return;
+    }
+
+    const finish = () => {
+      audio.removeEventListener("canplay", finish);
+      audio.removeEventListener("error", fail);
+      resolve();
+    };
+    const fail = () => {
+      audio.removeEventListener("canplay", finish);
+      audio.removeEventListener("error", fail);
+      reject(new Error("Title music could not be loaded."));
+    };
+
+    audio.addEventListener("canplay", finish, { once: true });
+    audio.addEventListener("error", fail, { once: true });
+    audio.load();
+  });
+}
+
 async function prepareTitleScreen() {
   const loadingStartedAt = performance.now();
   let displayedProgress = 4;
@@ -82,8 +144,12 @@ async function prepareTitleScreen() {
     }
   }, 80);
 
+  prepareAudio(titleBgm).catch(() => {
+    // Audio can still be requested again from the title control.
+  });
+
   try {
-    await Promise.all(requiredAssets.map(preloadImage));
+    await Promise.all(requiredImages.map(preloadImage));
   } catch {
     loadFailed = true;
   }
@@ -175,6 +241,15 @@ document.querySelector('[data-action="load"]').addEventListener("click", () => {
 });
 document.querySelector('[data-action="settings"]').addEventListener("click", () => {
   showStatus("설정 화면은 다음 단계에서 연결됩니다.");
+});
+audioToggle.addEventListener("click", () => {
+  if (titleBgm.paused) {
+    musicEnabled = true;
+    playTitleMusic();
+  } else {
+    musicEnabled = false;
+    stopTitleMusic();
+  }
 });
 document.querySelector('[data-action="return-title"]').addEventListener("click", () => {
   window.clearInterval(typeTimer);

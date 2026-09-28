@@ -15,6 +15,7 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23102f4c' d='M7 8h50v48H7z'/%3E%3Cpath fill='%23f6d48c' d='M32 8 39 25l17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3C/svg%3E"
     />
     <link rel="preload" as="image" href="./assets/images/title-screen.png" />
+    <link rel="preload" as="audio" type="audio/mpeg" href="./assets/audio/title-bgm.mp3" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -66,6 +67,11 @@
             </button>
           </nav>
         </section>
+
+        <button class="audio-toggle" type="button" data-action="toggle-audio" aria-pressed="false">
+          <span class="audio-icon" aria-hidden="true">♪</span>
+          <span class="audio-label">BGM 재생</span>
+        </button>
       </section>
 
       <section class="screen prologue-screen" data-screen="prologue" aria-label="도입 기록" hidden>
@@ -108,6 +114,7 @@
         <button class="return-button" type="button" data-action="return-title">타이틀로 돌아가기</button>
       </section>
 
+      <audio id="title-bgm" src="./assets/audio/title-bgm.mp3" preload="auto" loop></audio>
       <p class="status-message" role="status" aria-live="polite"></p>
     </main>
 

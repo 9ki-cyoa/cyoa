@@ -428,12 +428,80 @@ button {
   position: absolute;
 }
 
+.audio-toggle {
+  position: absolute;
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  bottom: clamp(1.25rem, 3vw, 2.5rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 248, 220, 0.28);
+  border-radius: 999px;
+  background: rgba(3, 18, 29, 0.45);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.audio-toggle:hover,
+.audio-toggle:focus-visible,
+.audio-toggle.is-playing {
+  border-color: rgba(255, 239, 190, 0.62);
+  background: rgba(3, 18, 29, 0.68);
+  color: #fff5d8;
+  outline: none;
+}
+
+.audio-icon {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: Georgia, serif;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.audio-toggle.is-playing .audio-icon {
+  box-shadow: 0 0 0.75rem rgba(255, 228, 153, 0.32);
+}
+
 .prologue-screen,
 .appearance-screen {
   display: grid;
   overflow: hidden;
   isolation: isolate;
   background: #06131d;
+}
+
+.prologue-screen {
+  background: #000;
+}
+
+.prologue-screen::before,
+.prologue-screen::after,
+.prologue-screen .record-sigil {
+  display: none;
+}
+
+.prologue-screen .dialogue-panel {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.94);
+  box-shadow:
+    0 1.6rem 4rem rgba(0, 0, 0, 0.7),
+    inset 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .prologue-screen::before,
@@ -747,6 +815,11 @@ button {
 }
 
 @media (max-width: 640px) {
+  .audio-toggle {
+    left: 1rem;
+    bottom: 1rem;
+  }
+
   .record-sigil {
     top: 10%;
   }
