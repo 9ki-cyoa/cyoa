@@ -17,28 +17,70 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="title-screen" aria-label="게임 타이틀 화면">
-      <section class="title-interface" aria-label="심역록 시작 메뉴">
-        <header class="title-lockup">
-          <span class="title-flare" aria-hidden="true"></span>
-          <h1 class="game-title">심역록</h1>
-          <span class="title-rule" aria-hidden="true"></span>
+    <main class="game-root">
+      <section class="screen title-screen" data-screen="title" aria-label="게임 타이틀 화면">
+        <section class="title-interface" aria-label="심역록 시작 메뉴">
+          <header class="title-lockup">
+            <span class="title-flare" aria-hidden="true"></span>
+            <h1 class="game-title">심역록</h1>
+            <span class="title-rule" aria-hidden="true"></span>
+          </header>
+
+          <nav class="title-menu" aria-label="게임 메뉴">
+            <button class="menu-button menu-button--primary" type="button" data-action="start">
+              <span class="menu-marker" aria-hidden="true"></span>
+              <span>시작하기</span>
+            </button>
+            <button class="menu-button" type="button" data-action="load">
+              <span class="menu-marker" aria-hidden="true"></span>
+              <span>불러오기</span>
+            </button>
+            <button class="menu-button" type="button" data-action="settings">
+              <span class="menu-marker" aria-hidden="true"></span>
+              <span>설정</span>
+            </button>
+          </nav>
+        </section>
+      </section>
+
+      <section class="screen prologue-screen" data-screen="prologue" aria-label="도입 기록" hidden>
+        <div class="record-sigil" aria-hidden="true">
+          <span></span>
+        </div>
+
+        <section class="dialogue-panel" tabindex="0" aria-label="대화창">
+          <header class="dialogue-header">
+            <span class="signal-dot" aria-hidden="true"></span>
+            <span>발신자 미상</span>
+            <span class="dialogue-count" aria-hidden="true"></span>
+          </header>
+
+          <p class="dialogue-text" aria-live="polite"></p>
+
+          <footer class="dialogue-footer">
+            <span class="dialogue-guide">클릭 또는 Space / Enter</span>
+            <span class="dialogue-caret" aria-hidden="true"></span>
+          </footer>
+
+          <button class="next-stage-button" type="button" data-action="appearance" hidden>
+            외형 선택으로
+          </button>
+        </section>
+      </section>
+
+      <section class="screen appearance-screen" data-screen="appearance" aria-labelledby="appearance-title" hidden>
+        <header class="choice-heading">
+          <span class="choice-step">첫 번째 기록</span>
+          <h2 id="appearance-title">외형</h2>
+          <p>당신의 모습을 선택하십시오.</p>
         </header>
 
-        <nav class="title-menu" aria-label="게임 메뉴">
-          <button class="menu-button menu-button--primary" type="button" data-action="start">
-            <span class="menu-marker" aria-hidden="true"></span>
-            <span>시작하기</span>
-          </button>
-          <button class="menu-button" type="button" data-action="load">
-            <span class="menu-marker" aria-hidden="true"></span>
-            <span>불러오기</span>
-          </button>
-          <button class="menu-button" type="button" data-action="settings">
-            <span class="menu-marker" aria-hidden="true"></span>
-            <span>설정</span>
-          </button>
-        </nav>
+        <div class="choice-placeholder">
+          <span aria-hidden="true"></span>
+          <p>선택 가능한 외형 기록이 없습니다.</p>
+        </div>
+
+        <button class="return-button" type="button" data-action="return-title">타이틀로 돌아가기</button>
       </section>
 
       <p class="status-message" role="status" aria-live="polite"></p>
