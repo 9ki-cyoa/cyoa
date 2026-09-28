@@ -103,18 +103,29 @@
       </section>
 
       <section class="screen appearance-screen" data-screen="appearance" aria-labelledby="appearance-title" hidden>
-        <header class="choice-heading">
-          <span class="choice-step">첫 번째 기록</span>
-          <h2 id="appearance-title">외형</h2>
-          <p>당신의 모습을 선택하십시오.</p>
-        </header>
+        <div class="appearance-scroll">
+          <header class="choice-heading">
+            <span class="choice-step">첫 번째 기록</span>
+            <h2 id="appearance-title">외형 재작성</h2>
+            <p>당신의 모습을 선택하십시오.</p>
 
-        <div class="choice-placeholder">
-          <span aria-hidden="true"></span>
-          <p>선택 가능한 외형 기록이 없습니다.</p>
+            <div class="choice-progress" aria-live="polite">
+              <span>선택 완료</span>
+              <strong data-selection-progress>0 / 11</strong>
+            </div>
+          </header>
+
+          <form class="appearance-form" aria-label="외형 선택">
+            <div class="choice-groups" data-choice-groups></div>
+
+            <footer class="choice-actions">
+              <button class="return-button" type="button" data-action="return-title">타이틀로 돌아가기</button>
+              <button class="confirm-appearance-button" type="button" data-action="confirm-appearance" disabled>
+                외형 확정
+              </button>
+            </footer>
+          </form>
         </div>
-
-        <button class="return-button" type="button" data-action="return-title">타이틀로 돌아가기</button>
       </section>
 
       <audio id="title-bgm" src="./assets/audio/title-bgm.mp3" preload="auto" loop></audio>

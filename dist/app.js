@@ -18,6 +18,52 @@ const prologueLines = [
   "당신의 모습을 선택하십시오.",
 ];
 
+const appearanceCategories = [
+  { id: "gender", title: "성별", options: ["남성", "여성"] },
+  {
+    id: "body-type",
+    title: "체형",
+    options: ["왜소함", "마름", "가늘고 김", "균형 잡힘", "탄탄함", "근육질", "육중함", "풍만함"],
+  },
+  { id: "height", title: "키", options: ["매우 작음", "작음", "평균", "큼", "매우 큼", "직접 지정"] },
+  {
+    id: "impression",
+    title: "인상",
+    options: ["강한 남성적", "남성적", "중성적", "여성적", "강한 여성적"],
+  },
+  {
+    id: "aura",
+    title: "분위기",
+    options: ["차가운", "따뜻한", "날카로운", "부드러운", "귀여운", "고고한", "음침한", "몽환적인", "위압적인", "순한", "활발한", "무심한"],
+  },
+  { id: "hair-length", title: "머리길이", options: ["삭발", "매우 짧음", "짧음", "중간", "김", "매우 김"] },
+  {
+    id: "hair-color",
+    title: "머리색",
+    options: ["흑색", "짙은 갈색", "갈색", "밝은 갈색", "금색", "백금색", "백색", "은색", "적색", "주황색", "분홍색", "청색", "하늘색", "녹색", "보라색", "회색", "기타"],
+  },
+  {
+    id: "hair-mix",
+    title: "머리색 혼합",
+    options: ["없음", "안쪽만 다른 색", "끝부분만 다른 색", "앞머리만 다른 색", "좌우 비대칭", "한 가닥 포인트", "그라데이션", "얼룩무늬", "전체 혼합"],
+  },
+  {
+    id: "eye-color",
+    title: "눈색",
+    options: ["흑색", "갈색", "금색", "적색", "청색", "녹색", "회색", "은색", "보라색", "백색", "오드아이", "기타"],
+  },
+  {
+    id: "pupil",
+    title: "동공",
+    options: ["원형", "세로형", "가로형", "타원형", "십자형", "별형", "고리형", "이중동공", "특수형"],
+  },
+  {
+    id: "skin-color",
+    title: "피부색",
+    options: ["매우 밝음", "밝음", "중간", "갈색", "짙은 갈색", "매우 어두움", "창백한 백색", "회색빛", "푸른빛", "붉은빛", "자주빛", "기타"],
+  },
+];
+
 const screens = [...document.querySelectorAll("[data-screen]")];
 const dialoguePanel = document.querySelector(".dialogue-panel");
 const dialogueText = document.querySelector(".dialogue-text");
@@ -31,6 +77,9 @@ const loadingPercent = document.querySelector(".loading-percent");
 const loadingStatus = document.querySelector(".loading-status");
 const loadingScreen = document.querySelector('[data-screen="loading"]');
 const enterTitleButton = document.querySelector('[data-action="enter-title"]');
+const choiceGroups = document.querySelector("[data-choice-groups]");
+const selectionProgress = document.querySelector("[data-selection-progress]");
+const confirmAppearanceButton = document.querySelector('[data-action="confirm-appearance"]');
 const titleBgm = document.querySelector("#title-bgm");
 const audioToggle = document.querySelector('[data-action="toggle-audio"]');
 const audioLabel = document.querySelector(".audio-label");
@@ -44,6 +93,7 @@ let isTyping = false;
 let musicEnabled = true;
 let loadingReady = false;
 let musicFadeFrame;
+const appearanceSelections = new Map();
 
 titleBgm.volume = 0.46;
 
@@ -59,6 +109,49 @@ function showScreen(name, options = {}) {
   } else if (!options.keepTitleMusic) {
     stopTitleMusic();
   }
+}
+
+function renderAppearanceChoices() {
+  const fragment = document.createDocumentFragment();
+
+  appearanceCategories.forEach((category, index) => {
+    const group = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    const number = document.createElement("span");
+    const title = document.createElement("span");
+    const optionList = document.createElement("div");
+
+    group.className = "choice-group";
+    group.dataset.category = category.id;
+    number.className = "choice-number";
+    number.textContent = String(index + 1).padStart(2, "0");
+    title.textContent = category.title;
+    legend.append(number, title);
+
+    optionList.className = "choice-options";
+    optionList.setAttribute("aria-label", category.title);
+
+    category.options.forEach((option) => {
+      const button = document.createElement("button");
+      button.className = "choice-option";
+      button.type = "button";
+      button.dataset.value = option;
+      button.setAttribute("aria-pressed", "false");
+      button.textContent = option;
+      optionList.append(button);
+    });
+
+    group.append(legend, optionList);
+    fragment.append(group);
+  });
+
+  choiceGroups.append(fragment);
+}
+
+function updateAppearanceProgress() {
+  const completed = appearanceSelections.size;
+  selectionProgress.textContent = `${completed} / ${appearanceCategories.length}`;
+  confirmAppearanceButton.disabled = completed !== appearanceCategories.length;
 }
 
 function updateAudioControl(isPlaying) {
@@ -300,6 +393,26 @@ document.querySelector('[data-action="load"]').addEventListener("click", () => {
 document.querySelector('[data-action="settings"]').addEventListener("click", () => {
   showStatus("설정 화면은 다음 단계에서 연결됩니다.");
 });
+choiceGroups.addEventListener("click", (event) => {
+  const selectedButton = event.target.closest(".choice-option");
+
+  if (!selectedButton) {
+    return;
+  }
+
+  const group = selectedButton.closest(".choice-group");
+  group.querySelectorAll(".choice-option").forEach((button) => {
+    const isSelected = button === selectedButton;
+    button.classList.toggle("is-selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
+
+  appearanceSelections.set(group.dataset.category, selectedButton.dataset.value);
+  updateAppearanceProgress();
+});
+confirmAppearanceButton.addEventListener("click", () => {
+  showStatus("외형 기록을 저장했습니다. 다음 기록을 준비합니다.");
+});
 audioToggle.addEventListener("click", () => {
   if (titleBgm.paused) {
     musicEnabled = true;
@@ -328,3 +441,4 @@ dialoguePanel.addEventListener("keydown", (event) => {
 });
 
 prepareTitleScreen();
+renderAppearanceChoices();
