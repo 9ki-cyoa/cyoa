@@ -28,6 +28,9 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const loadingTrack = document.querySelector(".loading-track");
 const loadingBar = document.querySelector(".loading-bar");
 const loadingPercent = document.querySelector(".loading-percent");
+const loadingStatus = document.querySelector(".loading-status");
+const loadingScreen = document.querySelector('[data-screen="loading"]');
+const enterTitleButton = document.querySelector('[data-action="enter-title"]');
 const titleBgm = document.querySelector("#title-bgm");
 const audioToggle = document.querySelector('[data-action="toggle-audio"]');
 const audioLabel = document.querySelector(".audio-label");
@@ -39,10 +42,12 @@ let typeTimer;
 let statusTimer;
 let isTyping = false;
 let musicEnabled = true;
+let loadingReady = false;
+let musicFadeFrame;
 
 titleBgm.volume = 0.46;
 
-function showScreen(name) {
+function showScreen(name, options = {}) {
   screens.forEach((screen) => {
     const isTarget = screen.dataset.screen === name;
     screen.hidden = !isTarget;
@@ -51,7 +56,7 @@ function showScreen(name) {
 
   if (name === "title") {
     playTitleMusic();
-  } else {
+  } else if (!options.keepTitleMusic) {
     stopTitleMusic();
   }
 }
@@ -68,6 +73,10 @@ async function playTitleMusic() {
     return;
   }
 
+  window.cancelAnimationFrame(musicFadeFrame);
+  musicFadeFrame = undefined;
+  titleBgm.volume = 0.46;
+
   try {
     await titleBgm.play();
     updateAudioControl(true);
@@ -77,9 +86,42 @@ async function playTitleMusic() {
 }
 
 function stopTitleMusic() {
+  window.cancelAnimationFrame(musicFadeFrame);
+  musicFadeFrame = undefined;
   titleBgm.pause();
   titleBgm.currentTime = 0;
+  titleBgm.volume = 0.46;
   updateAudioControl(false);
+}
+
+function fadeOutTitleMusic(duration = 1200) {
+  window.cancelAnimationFrame(musicFadeFrame);
+
+  if (titleBgm.paused) {
+    stopTitleMusic();
+    return;
+  }
+
+  const startedAt = performance.now();
+  const startingVolume = titleBgm.volume;
+  updateAudioControl(false);
+
+  const fadeStep = (now) => {
+    const progress = Math.min(1, (now - startedAt) / duration);
+    titleBgm.volume = startingVolume * (1 - progress);
+
+    if (progress < 1) {
+      musicFadeFrame = window.requestAnimationFrame(fadeStep);
+      return;
+    }
+
+    titleBgm.pause();
+    titleBgm.currentTime = 0;
+    titleBgm.volume = 0.46;
+    musicFadeFrame = undefined;
+  };
+
+  musicFadeFrame = window.requestAnimationFrame(fadeStep);
 }
 
 function updateLoadingProgress(value) {
@@ -161,10 +203,14 @@ async function prepareTitleScreen() {
   const remainingTime = Math.max(0, minimumDisplayTime - (performance.now() - loadingStartedAt));
 
   window.setTimeout(() => {
-    showScreen("title");
+    loadingReady = true;
+    loadingStatus.textContent = "기록 매체 동기화 완료";
+    loadingScreen.classList.add("is-ready");
+    enterTitleButton.hidden = false;
+    enterTitleButton.focus({ preventScroll: true });
 
     if (loadFailed) {
-      showStatus("배경 기록을 불러오지 못했습니다.");
+      loadingStatus.textContent = "일부 기록을 불러오지 못했습니다";
     }
   }, remainingTime + 180);
 }
@@ -220,9 +266,20 @@ function advanceDialogue() {
 
 function startPrologue() {
   currentLine = 0;
-  showScreen("prologue");
+  showScreen("prologue", { keepTitleMusic: true });
+  fadeOutTitleMusic(1200);
   renderLine();
   dialoguePanel.focus({ preventScroll: true });
+}
+
+function enterTitleScreen() {
+  if (!loadingReady) {
+    return;
+  }
+
+  loadingReady = false;
+  musicEnabled = true;
+  showScreen("title");
 }
 
 function showStatus(message) {
@@ -236,6 +293,7 @@ function showStatus(message) {
 }
 
 document.querySelector('[data-action="start"]').addEventListener("click", startPrologue);
+loadingScreen.addEventListener("click", enterTitleScreen);
 document.querySelector('[data-action="load"]').addEventListener("click", () => {
   showStatus("아직 불러올 기록이 없습니다.");
 });

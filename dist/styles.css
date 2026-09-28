@@ -424,6 +424,46 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+.enter-title-button {
+  display: block;
+  width: 100%;
+  margin-top: 2rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 243, 207, 0.86);
+  font-family: "NanumMyeongjo", "Noto Serif KR", "Batang", serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-shadow: 0 0 0.8rem rgba(255, 226, 150, 0.28);
+  animation: enter-pulse 1.8s ease-in-out infinite;
+}
+
+.enter-title-button::after {
+  display: block;
+  width: 8rem;
+  height: 1px;
+  margin: 0.65rem auto 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 235, 180, 0.72), transparent);
+  content: "";
+}
+
+.enter-title-button:hover,
+.enter-title-button:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.loading-screen.is-ready {
+  cursor: pointer;
+}
+
+.loading-screen.is-ready .loading-emblem {
+  animation-play-state: paused;
+}
+
 .game-root .title-screen {
   position: absolute;
 }
@@ -796,6 +836,12 @@ button {
   }
 }
 
+@keyframes enter-pulse {
+  50% {
+    opacity: 0.48;
+  }
+}
+
 @keyframes sigil-turn {
   to {
     transform: translateX(-50%) rotate(360deg);
@@ -850,6 +896,7 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .screen,
   .loading-emblem,
+  .enter-title-button,
   .record-sigil,
   .signal-dot,
   .dialogue-caret {
