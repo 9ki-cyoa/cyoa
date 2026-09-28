@@ -14,11 +14,36 @@
       type="image/svg+xml"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23102f4c' d='M7 8h50v48H7z'/%3E%3Cpath fill='%23f6d48c' d='M32 8 39 25l17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3C/svg%3E"
     />
+    <link rel="preload" as="image" href="./assets/images/title-screen.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="game-root">
-      <section class="screen title-screen" data-screen="title" aria-label="게임 타이틀 화면">
+      <section class="screen loading-screen" data-screen="loading" aria-label="게임 불러오는 중">
+        <div class="loading-emblem" aria-hidden="true">
+          <span></span>
+        </div>
+
+        <div class="loading-content">
+          <p class="loading-title">심역록</p>
+          <div
+            class="loading-track"
+            role="progressbar"
+            aria-label="게임 자료 불러오기"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span class="loading-bar"></span>
+          </div>
+          <div class="loading-meta">
+            <span>기록 매체 동기화</span>
+            <span class="loading-percent">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen title-screen" data-screen="title" aria-label="게임 타이틀 화면" hidden>
         <section class="title-interface" aria-label="심역록 시작 메뉴">
           <header class="title-lockup">
             <span class="title-flare" aria-hidden="true"></span>

@@ -311,6 +311,119 @@ button {
   display: none !important;
 }
 
+.loading-screen {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: clamp(3rem, 8vh, 5.5rem);
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(25, 84, 91, 0.28), transparent 28%),
+    linear-gradient(145deg, #06151f, #02080d 72%);
+  color: #eaf5ef;
+}
+
+.loading-screen::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(170, 220, 216, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170, 220, 216, 0.025) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  content: "";
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+}
+
+.loading-emblem {
+  position: relative;
+  width: clamp(7.5rem, 14vw, 11rem);
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 225, 219, 0.3);
+  border-radius: 50%;
+  box-shadow:
+    0 0 3rem rgba(105, 210, 211, 0.1),
+    inset 0 0 2rem rgba(105, 210, 211, 0.05);
+  animation: loading-rotate 9s linear infinite;
+}
+
+.loading-emblem::before,
+.loading-emblem::after,
+.loading-emblem span {
+  position: absolute;
+  content: "";
+}
+
+.loading-emblem::before {
+  inset: 13%;
+  border: 1px solid rgba(201, 236, 227, 0.28);
+  transform: rotate(45deg);
+}
+
+.loading-emblem::after {
+  inset: 33%;
+  border: 1px solid rgba(255, 231, 163, 0.68);
+  box-shadow: 0 0 1.4rem rgba(255, 222, 137, 0.22);
+  transform: rotate(45deg);
+}
+
+.loading-emblem span {
+  top: 50%;
+  left: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #fff1c6;
+  box-shadow: 0 0 1rem rgba(255, 233, 172, 0.75);
+  transform: translate(-50%, -50%);
+}
+
+.loading-content {
+  position: relative;
+  z-index: 1;
+  width: min(25rem, calc(100vw - 3rem));
+}
+
+.loading-title {
+  margin: 0 0 1.6rem;
+  color: #fff3cf;
+  font-family: "NanumMyeongjo", "Noto Serif KR", "Batang", serif;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-shadow: 0 0 1.2rem rgba(255, 226, 148, 0.2);
+}
+
+.loading-track {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(193, 224, 218, 0.14);
+}
+
+.loading-bar {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #6bb6b5, #fff0bf);
+  box-shadow: 0 0 0.8rem rgba(197, 238, 225, 0.55);
+  transition: width 160ms ease-out;
+}
+
+.loading-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  color: rgba(192, 220, 215, 0.56);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.loading-percent {
+  font-variant-numeric: tabular-nums;
+}
+
 .game-root .title-screen {
   position: absolute;
 }
@@ -609,6 +722,12 @@ button {
   }
 }
 
+@keyframes loading-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes sigil-turn {
   to {
     transform: translateX(-50%) rotate(360deg);
@@ -657,6 +776,7 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .screen,
+  .loading-emblem,
   .record-sigil,
   .signal-dot,
   .dialogue-caret {

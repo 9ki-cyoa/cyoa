@@ -25,6 +25,10 @@ const dialogueCount = document.querySelector(".dialogue-count");
 const nextStageButton = document.querySelector('[data-action="appearance"]');
 const statusMessage = document.querySelector(".status-message");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const loadingTrack = document.querySelector(".loading-track");
+const loadingBar = document.querySelector(".loading-bar");
+const loadingPercent = document.querySelector(".loading-percent");
+const requiredAssets = ["./assets/images/title-screen.png"];
 
 let currentLine = 0;
 let visibleText = "";
@@ -38,6 +42,65 @@ function showScreen(name) {
     screen.hidden = !isTarget;
     screen.classList.toggle("is-active", isTarget);
   });
+}
+
+function updateLoadingProgress(value) {
+  const progress = Math.min(100, Math.max(0, Math.round(value)));
+  loadingBar.style.width = `${progress}%`;
+  loadingPercent.textContent = `${progress}%`;
+  loadingTrack.setAttribute("aria-valuenow", String(progress));
+}
+
+function preloadImage(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.addEventListener("load", async () => {
+      try {
+        await image.decode();
+      } catch {
+        // The load event already confirms the image is usable.
+      }
+      resolve();
+    }, { once: true });
+    image.addEventListener("error", reject, { once: true });
+    image.src = source;
+  });
+}
+
+async function prepareTitleScreen() {
+  const loadingStartedAt = performance.now();
+  let displayedProgress = 4;
+  let loadFailed = false;
+
+  updateLoadingProgress(displayedProgress);
+
+  const progressTimer = window.setInterval(() => {
+    if (displayedProgress < 90) {
+      displayedProgress += Math.max(0.6, (90 - displayedProgress) * 0.07);
+      updateLoadingProgress(displayedProgress);
+    }
+  }, 80);
+
+  try {
+    await Promise.all(requiredAssets.map(preloadImage));
+  } catch {
+    loadFailed = true;
+  }
+
+  window.clearInterval(progressTimer);
+  updateLoadingProgress(100);
+
+  const minimumDisplayTime = reduceMotion.matches ? 0 : 650;
+  const remainingTime = Math.max(0, minimumDisplayTime - (performance.now() - loadingStartedAt));
+
+  window.setTimeout(() => {
+    showScreen("title");
+
+    if (loadFailed) {
+      showStatus("배경 기록을 불러오지 못했습니다.");
+    }
+  }, remainingTime + 180);
 }
 
 function finishTyping() {
@@ -130,3 +193,5 @@ dialoguePanel.addEventListener("keydown", (event) => {
     advanceDialogue();
   }
 });
+
+prepareTitleScreen();
