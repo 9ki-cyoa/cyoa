@@ -8,7 +8,7 @@
       name="description"
       content="판타지 세계를 여행하는 CYOA 게임의 타이틀 화면"
     />
-    <title>CYOA</title>
+    <title>심역록</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -18,19 +18,28 @@
   </head>
   <body>
     <main class="title-screen" aria-label="게임 타이틀 화면">
-      <div class="light-wash" aria-hidden="true"></div>
+      <section class="title-interface" aria-label="심역록 시작 메뉴">
+        <header class="title-lockup">
+          <span class="title-flare" aria-hidden="true"></span>
+          <h1 class="game-title">심역록</h1>
+          <span class="title-rule" aria-hidden="true"></span>
+        </header>
 
-      <nav class="title-menu" aria-label="게임 메뉴">
-        <button class="menu-button menu-button--primary" type="button" data-action="start">
-          <span>시작하기</span>
-        </button>
-        <button class="menu-button" type="button" data-action="load">
-          <span>불러오기</span>
-        </button>
-        <button class="menu-button" type="button" data-action="settings">
-          <span>설정</span>
-        </button>
-      </nav>
+        <nav class="title-menu" aria-label="게임 메뉴">
+          <button class="menu-button menu-button--primary" type="button" data-action="start">
+            <span class="menu-marker" aria-hidden="true"></span>
+            <span>시작하기</span>
+          </button>
+          <button class="menu-button" type="button" data-action="load">
+            <span class="menu-marker" aria-hidden="true"></span>
+            <span>불러오기</span>
+          </button>
+          <button class="menu-button" type="button" data-action="settings">
+            <span class="menu-marker" aria-hidden="true"></span>
+            <span>설정</span>
+          </button>
+        </nav>
+      </section>
 
       <p class="status-message" role="status" aria-live="polite"></p>
     </main>
