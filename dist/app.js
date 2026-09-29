@@ -19,7 +19,15 @@ const prologueLines = [
 ];
 
 const appearanceCategories = [
-  { id: "gender", title: "성별", options: ["남성", "여성"] },
+  {
+    id: "gender",
+    title: "성별",
+    visual: true,
+    options: [
+      { value: "남성", image: "./assets/images/appearance-male.png" },
+      { value: "여성", image: "./assets/images/appearance-female.png" },
+    ],
+  },
   {
     id: "body-type",
     title: "체형",
@@ -83,7 +91,11 @@ const confirmAppearanceButton = document.querySelector('[data-action="confirm-ap
 const titleBgm = document.querySelector("#title-bgm");
 const audioToggle = document.querySelector('[data-action="toggle-audio"]');
 const audioLabel = document.querySelector(".audio-label");
-const requiredImages = ["./assets/images/title-screen.png"];
+const requiredImages = [
+  "./assets/images/title-screen.png",
+  "./assets/images/appearance-male.png",
+  "./assets/images/appearance-female.png",
+];
 
 let currentLine = 0;
 let visibleText = "";
@@ -129,15 +141,35 @@ function renderAppearanceChoices() {
     legend.append(number, title);
 
     optionList.className = "choice-options";
+    optionList.classList.toggle("choice-options--visual", Boolean(category.visual));
     optionList.setAttribute("aria-label", category.title);
 
     category.options.forEach((option) => {
       const button = document.createElement("button");
+      const value = typeof option === "string" ? option : option.value;
+
       button.className = "choice-option";
       button.type = "button";
-      button.dataset.value = option;
+      button.dataset.value = value;
       button.setAttribute("aria-pressed", "false");
-      button.textContent = option;
+
+      if (typeof option === "string") {
+        button.textContent = option;
+      } else {
+        const image = document.createElement("img");
+        const label = document.createElement("span");
+
+        button.classList.add("choice-option--visual");
+        image.className = "choice-option-image";
+        image.src = option.image;
+        image.alt = "";
+        image.decoding = "async";
+        image.draggable = false;
+        label.className = "choice-option-label";
+        label.textContent = value;
+        button.append(image, label);
+      }
+
       optionList.append(button);
     });
 
@@ -434,6 +466,10 @@ nextStageButton.addEventListener("click", (event) => {
 
 dialoguePanel.addEventListener("click", advanceDialogue);
 dialoguePanel.addEventListener("keydown", (event) => {
+  if (event.target.closest("button")) {
+    return;
+  }
+
   if (event.key === " " || event.key === "Enter") {
     event.preventDefault();
     advanceDialogue();

@@ -1042,6 +1042,69 @@ button {
     transform 150ms ease;
 }
 
+.choice-options--visual {
+  grid-template-columns: repeat(2, minmax(0, 20rem));
+  justify-content: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.choice-option--visual {
+  position: relative;
+  min-height: 0;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  padding: 0;
+  border-color: rgba(170, 211, 213, 0.3);
+  border-radius: 0.4rem;
+  background: #07121f;
+  isolation: isolate;
+}
+
+.choice-option--visual::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, transparent 48%, rgba(2, 8, 18, 0.28) 68%, rgba(2, 8, 18, 0.94) 100%),
+    linear-gradient(135deg, rgba(110, 191, 222, 0.08), transparent 42%);
+  content: "";
+  pointer-events: none;
+  transition: background-color 180ms ease;
+}
+
+.choice-option-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.86) brightness(0.88);
+  transform: scale(1.01);
+  transition:
+    filter 220ms ease,
+    transform 420ms ease;
+}
+
+.choice-option-label {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 2;
+  color: rgba(239, 245, 246, 0.92);
+  font-family: "NanumMyeongjo", "Noto Serif KR", "Batang", serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-shadow: 0 2px 0.8rem rgba(0, 0, 0, 0.95);
+}
+
+.choice-option--visual:hover .choice-option-image,
+.choice-option--visual:focus-visible .choice-option-image {
+  filter: saturate(1) brightness(1.02);
+  transform: scale(1.035);
+}
+
 .choice-option:hover,
 .choice-option:focus-visible {
   border-color: rgba(176, 226, 222, 0.55);
@@ -1059,6 +1122,26 @@ button {
     0 0 0 1px rgba(255, 228, 148, 0.1),
     0 0 1.2rem rgba(123, 210, 208, 0.16),
     inset 0 1px rgba(255, 247, 219, 0.14);
+}
+
+.choice-option--visual.is-selected {
+  border-color: rgba(255, 230, 157, 0.92);
+  background: #07121f;
+  box-shadow:
+    0 0 0 1px rgba(255, 228, 148, 0.18),
+    0 0 1.8rem rgba(109, 204, 218, 0.24),
+    inset 0 0 0 1px rgba(255, 247, 219, 0.14);
+}
+
+.choice-option--visual.is-selected .choice-option-image {
+  filter: saturate(1.04) brightness(1.05);
+}
+
+.choice-option--visual.is-selected .choice-option-label {
+  color: #fff0bb;
+  text-shadow:
+    0 2px 0.8rem rgba(0, 0, 0, 0.95),
+    0 0 1rem rgba(255, 225, 143, 0.42);
 }
 
 .choice-actions {
@@ -1120,6 +1203,22 @@ button {
     min-height: 3rem;
     padding-inline: 0.55rem;
     font-size: 0.88rem;
+  }
+
+  .choice-options--visual {
+    gap: 0.6rem;
+  }
+
+  .choice-option--visual {
+    min-height: 0;
+    padding: 0;
+  }
+
+  .choice-option-label {
+    right: 0.6rem;
+    bottom: 0.7rem;
+    left: 0.6rem;
+    font-size: 1rem;
   }
 
   .choice-actions {
