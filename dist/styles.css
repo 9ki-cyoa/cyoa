@@ -1051,7 +1051,7 @@ button {
 .choice-option--visual {
   position: relative;
   min-height: 0;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 1;
   overflow: hidden;
   padding: 0;
   border-color: rgba(170, 211, 213, 0.3);
