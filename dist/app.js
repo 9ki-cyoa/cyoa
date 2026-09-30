@@ -86,6 +86,7 @@ const loadingStatus = document.querySelector(".loading-status");
 const loadingScreen = document.querySelector('[data-screen="loading"]');
 const enterTitleButton = document.querySelector('[data-action="enter-title"]');
 const choiceGroups = document.querySelector("[data-choice-groups]");
+const appearanceScreen = document.querySelector('[data-screen="appearance"]');
 const selectionProgress = document.querySelector("[data-selection-progress]");
 const currentCategoryLabel = document.querySelector("[data-current-category]");
 const previousAppearanceButton = document.querySelector('[data-action="previous-appearance"]');
@@ -143,6 +144,7 @@ function renderAppearanceChoices() {
     number.className = "choice-number";
     number.textContent = String(index + 1).padStart(2, "0");
     title.textContent = category.title;
+    legend.tabIndex = -1;
     legend.append(number, title);
 
     optionList.className = "choice-options";
@@ -168,6 +170,8 @@ function renderAppearanceChoices() {
         image.className = "choice-option-image";
         image.src = option.image;
         image.alt = "";
+        image.width = 1254;
+        image.height = 1254;
         image.decoding = "async";
         image.draggable = false;
         label.className = "choice-option-label";
@@ -203,7 +207,8 @@ function updateAppearanceStep({ focus = false } = {}) {
   nextAppearanceButton.textContent = isLastStep ? "외형 확정" : "다음";
 
   if (focus) {
-    choiceGroups.querySelector(".choice-group.is-current .choice-option")?.focus({ preventScroll: true });
+    appearanceScreen.scrollTop = 0;
+    choiceGroups.querySelector(".choice-group.is-current legend")?.focus({ preventScroll: true });
   }
 }
 
@@ -484,7 +489,7 @@ nextAppearanceButton.addEventListener("click", () => {
     return;
   }
 
-  showStatus("외형 기록을 저장했습니다. 다음 기록을 준비합니다.");
+  showStatus("외형 선택이 완료되었습니다. 다음 단계는 준비 중입니다.");
 });
 audioToggle.addEventListener("click", () => {
   if (titleBgm.paused) {
@@ -503,8 +508,8 @@ document.querySelector('[data-action="return-title"]').addEventListener("click",
 nextStageButton.addEventListener("click", (event) => {
   event.stopPropagation();
   currentAppearanceStep = 0;
-  updateAppearanceStep();
   showScreen("appearance");
+  updateAppearanceStep({ focus: true });
 });
 
 dialoguePanel.addEventListener("click", advanceDialogue);
