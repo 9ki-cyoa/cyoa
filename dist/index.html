@@ -22,7 +22,7 @@
       href="https://raw.githubusercontent.com/9ki-cyoa/cyoa/main/media/title-bgm.mp3"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260930-3" />
+    <link rel="stylesheet" href="./styles.css?v=20261001-1" />
   </head>
   <body>
     <main class="game-root">
@@ -116,8 +116,8 @@
             <p>당신의 모습을 선택하십시오.</p>
 
             <div class="choice-progress" aria-live="polite">
-              <span>선택 완료</span>
-              <strong data-selection-progress>0 / 11</strong>
+              <span data-current-category>성별</span>
+              <strong data-selection-progress>01 / 11</strong>
             </div>
           </header>
 
@@ -126,9 +126,14 @@
 
             <footer class="choice-actions">
               <button class="return-button" type="button" data-action="return-title">타이틀로 돌아가기</button>
-              <button class="confirm-appearance-button" type="button" data-action="confirm-appearance" disabled>
-                외형 확정
-              </button>
+              <div class="choice-navigation">
+                <button class="previous-appearance-button" type="button" data-action="previous-appearance" disabled>
+                  이전
+                </button>
+                <button class="confirm-appearance-button" type="button" data-action="next-appearance" disabled>
+                  다음
+                </button>
+              </div>
             </footer>
           </form>
         </div>
@@ -144,6 +149,6 @@
       <p class="status-message" role="status" aria-live="polite"></p>
     </main>
 
-    <script src="./app.js?v=20260930-3"></script>
+    <script src="./app.js?v=20261001-1"></script>
   </body>
 </html>

@@ -87,7 +87,9 @@ const loadingScreen = document.querySelector('[data-screen="loading"]');
 const enterTitleButton = document.querySelector('[data-action="enter-title"]');
 const choiceGroups = document.querySelector("[data-choice-groups]");
 const selectionProgress = document.querySelector("[data-selection-progress]");
-const confirmAppearanceButton = document.querySelector('[data-action="confirm-appearance"]');
+const currentCategoryLabel = document.querySelector("[data-current-category]");
+const previousAppearanceButton = document.querySelector('[data-action="previous-appearance"]');
+const nextAppearanceButton = document.querySelector('[data-action="next-appearance"]');
 const titleBgm = document.querySelector("#title-bgm");
 const audioToggle = document.querySelector('[data-action="toggle-audio"]');
 const audioLabel = document.querySelector(".audio-label");
@@ -105,6 +107,7 @@ let isTyping = false;
 let musicEnabled = true;
 let loadingReady = false;
 let musicFadeFrame;
+let currentAppearanceStep = 0;
 const appearanceSelections = new Map();
 
 titleBgm.volume = 0.46;
@@ -135,6 +138,8 @@ function renderAppearanceChoices() {
 
     group.className = "choice-group";
     group.dataset.category = category.id;
+    group.dataset.step = String(index);
+    group.hidden = index !== currentAppearanceStep;
     number.className = "choice-number";
     number.textContent = String(index + 1).padStart(2, "0");
     title.textContent = category.title;
@@ -178,12 +183,28 @@ function renderAppearanceChoices() {
   });
 
   choiceGroups.append(fragment);
+  updateAppearanceStep();
 }
 
-function updateAppearanceProgress() {
-  const completed = appearanceSelections.size;
-  selectionProgress.textContent = `${completed} / ${appearanceCategories.length}`;
-  confirmAppearanceButton.disabled = completed !== appearanceCategories.length;
+function updateAppearanceStep({ focus = false } = {}) {
+  const category = appearanceCategories[currentAppearanceStep];
+  const isLastStep = currentAppearanceStep === appearanceCategories.length - 1;
+
+  choiceGroups.querySelectorAll(".choice-group").forEach((group, index) => {
+    const isCurrent = index === currentAppearanceStep;
+    group.hidden = !isCurrent;
+    group.classList.toggle("is-current", isCurrent);
+  });
+
+  currentCategoryLabel.textContent = category.title;
+  selectionProgress.textContent = `${String(currentAppearanceStep + 1).padStart(2, "0")} / ${String(appearanceCategories.length).padStart(2, "0")}`;
+  previousAppearanceButton.disabled = currentAppearanceStep === 0;
+  nextAppearanceButton.disabled = !appearanceSelections.has(category.id);
+  nextAppearanceButton.textContent = isLastStep ? "외형 확정" : "다음";
+
+  if (focus) {
+    choiceGroups.querySelector(".choice-group.is-current .choice-option")?.focus({ preventScroll: true });
+  }
 }
 
 function updateAudioControl(isPlaying) {
@@ -440,9 +461,29 @@ choiceGroups.addEventListener("click", (event) => {
   });
 
   appearanceSelections.set(group.dataset.category, selectedButton.dataset.value);
-  updateAppearanceProgress();
+  updateAppearanceStep();
 });
-confirmAppearanceButton.addEventListener("click", () => {
+previousAppearanceButton.addEventListener("click", () => {
+  if (currentAppearanceStep === 0) {
+    return;
+  }
+
+  currentAppearanceStep -= 1;
+  updateAppearanceStep({ focus: true });
+});
+nextAppearanceButton.addEventListener("click", () => {
+  const category = appearanceCategories[currentAppearanceStep];
+
+  if (!appearanceSelections.has(category.id)) {
+    return;
+  }
+
+  if (currentAppearanceStep < appearanceCategories.length - 1) {
+    currentAppearanceStep += 1;
+    updateAppearanceStep({ focus: true });
+    return;
+  }
+
   showStatus("외형 기록을 저장했습니다. 다음 기록을 준비합니다.");
 });
 audioToggle.addEventListener("click", () => {
@@ -461,6 +502,8 @@ document.querySelector('[data-action="return-title"]').addEventListener("click",
 
 nextStageButton.addEventListener("click", (event) => {
   event.stopPropagation();
+  currentAppearanceStep = 0;
+  updateAppearanceStep();
   showScreen("appearance");
 });
 
