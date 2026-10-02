@@ -83,7 +83,7 @@ class Element {
   focus() { this.document.activeElement = this; }
 }
 
-function setup() {
+function setup({ hostname = "", search = "" } = {}) {
   const document = new Element("document");
   document.createElement = (tag) => Object.assign(new Element(tag), { document });
   document.createDocumentFragment = () => document.createElement("fragment");
@@ -113,6 +113,7 @@ function setup() {
     load() {},
   });
   const window = {
+    location: { hostname, search },
     matchMedia: () => ({ matches: true }),
     setTimeout: () => 1, clearTimeout() {},
     setInterval: () => 1, clearInterval() {},
@@ -121,7 +122,7 @@ function setup() {
   const context = vm.createContext({
     document, window, performance: { now: () => 0 },
     HTMLMediaElement: { HAVE_FUTURE_DATA: 3 },
-    Image: class { addEventListener() {} },
+    Image: class { addEventListener() {} }, URLSearchParams,
   });
   vm.runInContext(script, context);
   const query = (selector) => document.querySelector(selector);
@@ -290,6 +291,17 @@ test("eight race images follow the supplied order and a single race is selected"
   assert.equal(query(".status-message").textContent, "종족 기록을 확인했습니다. 적응 단계는 준비 중입니다.");
 });
 
+test("local race preview opens the gallery without changing the deployed start screen", () => {
+  const local = setup({ hostname: "127.0.0.1", search: "?preview=race" });
+  assert.equal(local.query('[data-screen="race"]').hidden, false);
+  assert.equal(local.query('[data-screen="loading"]').hidden, true);
+  assert.equal(local.query("[data-race-cards]").querySelectorAll(".race-card").length, 8);
+
+  const deployed = setup({ hostname: "example.neocities.org", search: "?preview=race" });
+  assert.equal(deployed.query('[data-screen="loading"]').hidden, false);
+  assert.equal(deployed.query('[data-screen="race"]').hidden, true);
+});
+
 test("portraits are square and all local page assets exist", () => {
   for (const name of ["male", "female"]) {
     const png = fs.readFileSync(path.join(root, `dist/assets/images/appearance-${name}.png`));
@@ -309,7 +321,7 @@ test("portraits are square and all local page assets exist", () => {
     assert.ok(webp.length < fs.statSync(source).size);
   }
   assert.match(html, /styles\.css\?v=20261002-2/);
-  assert.match(html, /app\.js\?v=20261002-2/);
+  assert.match(html, /app\.js\?v=20261002-3/);
 });
 
 test("appearance has one neutral theme, square borderless portraits and narrow-screen navigation", () => {

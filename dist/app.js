@@ -630,6 +630,15 @@ dialoguePanel.addEventListener("keydown", (event) => {
   }
 });
 
-prepareTitleScreen();
 renderAppearanceChoices();
 renderRaceChoices();
+
+const isLocalRacePreview = ["localhost", "127.0.0.1"].includes(window.location?.hostname)
+  && new URLSearchParams(window.location.search).get("preview") === "race";
+
+if (isLocalRacePreview) {
+  showScreen("race");
+  document.querySelector("#race-title").focus({ preventScroll: true });
+} else {
+  prepareTitleScreen();
+}
