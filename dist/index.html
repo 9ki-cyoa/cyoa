@@ -22,7 +22,7 @@
       href="https://raw.githubusercontent.com/9ki-cyoa/cyoa/main/media/title-bgm.mp3"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="./styles.css?v=20261002-1" />
+    <link rel="stylesheet" href="./styles.css?v=20261002-2" />
   </head>
   <body>
     <main class="game-root">
@@ -139,6 +139,32 @@
         </div>
       </section>
 
+      <section class="screen appearance-screen race-screen" data-screen="race" aria-labelledby="race-title" hidden>
+        <div class="appearance-scroll race-scroll">
+          <header class="choice-heading">
+            <span class="choice-step">두 번째 기록</span>
+            <h2 id="race-title" tabindex="-1">종족 선택</h2>
+            <p>기본 형상의 기록을 확인했습니다. 육체의 기원을 선택하십시오.</p>
+
+            <div class="choice-progress" aria-live="polite">
+              <span>생명의 계통</span>
+              <strong>8개의 기록</strong>
+            </div>
+          </header>
+
+          <div class="race-form">
+            <div class="race-grid" data-race-cards aria-label="종족 선택지"></div>
+
+            <footer class="choice-actions">
+              <button class="return-button" type="button" data-action="return-appearance">외형으로 돌아가기</button>
+              <div class="choice-navigation">
+                <button class="confirm-race-button" type="button" data-action="confirm-race" disabled>종족 확정</button>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </section>
+
     <audio
       id="title-bgm"
       src="https://raw.githubusercontent.com/9ki-cyoa/cyoa/main/media/title-bgm.mp3"
@@ -149,6 +175,6 @@
       <p class="status-message" role="status" aria-live="polite"></p>
     </main>
 
-    <script src="./app.js?v=20261002-1"></script>
+    <script src="./app.js?v=20261002-2"></script>
   </body>
 </html>

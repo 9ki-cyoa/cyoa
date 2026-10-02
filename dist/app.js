@@ -75,6 +75,17 @@ const appearanceCategories = [
   },
 ];
 
+const raceOptions = [
+  { id: "human", title: "인간", image: "./assets/images/races/human.webp", description: "심도 0을 중심으로 문명을 이루고, 지식과 장비로 여러 심역을 탐사한다." },
+  { id: "dragon", title: "용인", image: "./assets/images/races/dragon.webp", description: "아미 마운틴의 혹독한 환경에서 살아가는 강인한 아인." },
+  { id: "merfolk", title: "인어", image: "./assets/images/races/merfolk.webp", description: "푸른 해역에서 물속을 자유롭게 누비며 살아가는 수생 아인." },
+  { id: "oni", title: "귀인", image: "./assets/images/races/oni.webp", description: "대평원에서 강한 완력과 평생 단련한 무구로 살아가는 아인." },
+  { id: "catfolk", title: "묘인", image: "./assets/images/races/catfolk.webp", description: "예민한 감각과 유연한 몸으로 복잡한 지형을 오가는 아인." },
+  { id: "underground", title: "지저인", image: "./assets/images/races/underground.webp", description: "광물의 색을 읽고 지하의 길을 기억하는 아인." },
+  { id: "skyfolk", title: "천인", image: "./assets/images/races/skyfolk.webp", description: "천공에서 날개로 하늘을 자유롭게 나는 아인." },
+  { id: "demon", title: "마인", image: "./assets/images/races/demon.webp", description: "특수한 언어로 세상에 영향을 주는, 인간과 닮은 아인." },
+];
+
 const screens = [...document.querySelectorAll("[data-screen]")];
 const dialoguePanel = document.querySelector(".dialogue-panel");
 const dialogueText = document.querySelector(".dialogue-text");
@@ -94,6 +105,9 @@ const selectionProgress = document.querySelector("[data-selection-progress]");
 const currentCategoryLabel = document.querySelector("[data-current-category]");
 const previousAppearanceButton = document.querySelector('[data-action="previous-appearance"]');
 const nextAppearanceButton = document.querySelector('[data-action="next-appearance"]');
+const raceScreen = document.querySelector('[data-screen="race"]');
+const raceCards = document.querySelector("[data-race-cards]");
+const confirmRaceButton = document.querySelector('[data-action="confirm-race"]');
 const titleBgm = document.querySelector("#title-bgm");
 const audioToggle = document.querySelector('[data-action="toggle-audio"]');
 const audioLabel = document.querySelector(".audio-label");
@@ -101,6 +115,7 @@ const requiredImages = [
   "./assets/images/title-screen.png",
   "./assets/images/appearance-male.png",
   "./assets/images/appearance-female.png",
+  ...raceOptions.map((race) => race.image),
 ];
 
 let currentLine = 0;
@@ -113,6 +128,7 @@ let loadingReady = false;
 let musicFadeFrame;
 let currentAppearanceStep = 0;
 const appearanceSelections = new Map();
+let selectedRace = null;
 
 titleBgm.volume = 0.46;
 
@@ -197,6 +213,40 @@ function renderAppearanceChoices() {
 
   choiceGroups.append(fragment);
   updateAppearanceStep();
+}
+
+function renderRaceChoices() {
+  const fragment = document.createDocumentFragment();
+
+  raceOptions.forEach((race) => {
+    const card = document.createElement("button");
+    const image = document.createElement("img");
+    const copy = document.createElement("span");
+    const name = document.createElement("span");
+    const description = document.createElement("span");
+
+    card.className = "race-card";
+    card.type = "button";
+    card.dataset.race = race.id;
+    card.setAttribute("aria-pressed", "false");
+    image.className = "race-image";
+    image.src = race.image;
+    image.alt = "";
+    image.width = 1000;
+    image.height = race.id === "underground" ? 1206 : 1333;
+    image.decoding = "async";
+    image.draggable = false;
+    copy.className = "race-card-copy";
+    name.className = "race-card-name";
+    name.textContent = race.title;
+    description.className = "race-card-description";
+    description.textContent = race.description;
+    copy.append(name, description);
+    card.append(image, copy);
+    fragment.append(card);
+  });
+
+  raceCards.append(fragment);
 }
 
 function updateAppearanceStep({ focus = false } = {}) {
@@ -354,11 +404,8 @@ async function prepareTitleScreen() {
     // Audio can still be requested again from the title control.
   });
 
-  try {
-    await Promise.all(requiredImages.map(preloadImage));
-  } catch {
-    loadFailed = true;
-  }
+  const imageResults = await Promise.allSettled(requiredImages.map(preloadImage));
+  loadFailed = imageResults.some((result) => result.status === "rejected");
 
   window.clearInterval(progressTimer);
   updateLoadingProgress(100);
@@ -521,7 +568,34 @@ nextAppearanceButton.addEventListener("click", () => {
     return;
   }
 
-  showStatus("외형 선택이 완료되었습니다. 다음 단계는 준비 중입니다.");
+  showScreen("race");
+  raceScreen.scrollTop = 0;
+  document.querySelector("#race-title").focus({ preventScroll: true });
+});
+raceCards.addEventListener("click", (event) => {
+  const card = event.target.closest(".race-card");
+
+  if (!card) {
+    return;
+  }
+
+  selectedRace = card.dataset.race;
+  raceCards.querySelectorAll(".race-card").forEach((candidate) => {
+    const isSelected = candidate === card;
+    candidate.classList.toggle("is-selected", isSelected);
+    candidate.setAttribute("aria-pressed", String(isSelected));
+  });
+  confirmRaceButton.disabled = false;
+});
+document.querySelector('[data-action="return-appearance"]').addEventListener("click", () => {
+  currentAppearanceStep = appearanceCategories.length - 1;
+  showScreen("appearance");
+  updateAppearanceStep({ focus: true });
+});
+confirmRaceButton.addEventListener("click", () => {
+  if (selectedRace) {
+    showStatus("종족 기록을 확인했습니다. 적응 단계는 준비 중입니다.");
+  }
 });
 audioToggle.addEventListener("click", () => {
   if (titleBgm.paused) {
@@ -558,3 +632,4 @@ dialoguePanel.addEventListener("keydown", (event) => {
 
 prepareTitleScreen();
 renderAppearanceChoices();
+renderRaceChoices();

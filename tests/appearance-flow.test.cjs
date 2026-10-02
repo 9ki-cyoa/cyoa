@@ -141,7 +141,7 @@ function setup() {
     assert.equal(query('[data-action="appearance"]').hidden, false);
     click(query('[data-action="appearance"]'));
   };
-  return { document, query, click, currentGroup, begin };
+  return { document, query, click, currentGroup, begin, context };
 }
 
 test("prologue leads into 11 sequential categories; selection is required", () => {
@@ -169,7 +169,9 @@ test("prologue leads into 11 sequential categories; selection is required", () =
       assert.equal(document.activeElement, currentGroup().querySelector("legend"));
     }
   }
-  assert.equal(query(".status-message").textContent, "외형 선택이 완료되었습니다. 다음 단계는 준비 중입니다.");
+  assert.equal(query('[data-screen="race"]').hidden, false);
+  assert.equal(query('[data-screen="appearance"]').hidden, true);
+  assert.equal(document.activeElement, query("#race-title"));
 });
 
 test("gender image clicks, single selection, back navigation and re-entry preserve choices", () => {
@@ -255,6 +257,39 @@ test("aura, hair color and eye color each allow several choices and can be clear
   }
 });
 
+test("eight race images follow the supplied order and a single race is selected", () => {
+  const { query, click, currentGroup, begin, context } = setup();
+  begin();
+  for (let step = 0; step < 11; step++) {
+    click(currentGroup().querySelector(".choice-option"));
+    click(query('[data-action="next-appearance"]'));
+  }
+
+  const cards = query("[data-race-cards]").querySelectorAll(".race-card");
+  assert.deepEqual(cards.map((card) => card.querySelector(".race-card-name").textContent),
+    ["인간", "용인", "인어", "귀인", "묘인", "지저인", "천인", "마인"]);
+  assert.equal(query('[data-action="confirm-race"]').disabled, true);
+  for (const card of cards) {
+    assert.ok(card.querySelector(".race-image"));
+    assert.ok(card.querySelector(".race-card-description").textContent);
+  }
+  const required = Array.from(vm.runInContext("requiredImages", context));
+  for (const card of cards) assert.ok(required.includes(card.querySelector(".race-image").src));
+
+  click(cards[0].querySelector("img"));
+  click(cards[6].querySelector("img"));
+  assert.equal(cards[0].getAttribute("aria-pressed"), "false");
+  assert.equal(cards[6].getAttribute("aria-pressed"), "true");
+  assert.equal(query('[data-action="confirm-race"]').disabled, false);
+  click(query('[data-action="return-appearance"]'));
+  assert.equal(query('[data-screen="appearance"]').hidden, false);
+  assert.equal(currentGroup().dataset.category, "skin-color");
+  click(query('[data-action="next-appearance"]'));
+  assert.equal(cards[6].getAttribute("aria-pressed"), "true");
+  click(query('[data-action="confirm-race"]'));
+  assert.equal(query(".status-message").textContent, "종족 기록을 확인했습니다. 적응 단계는 준비 중입니다.");
+});
+
 test("portraits are square and all local page assets exist", () => {
   for (const name of ["male", "female"]) {
     const png = fs.readFileSync(path.join(root, `dist/assets/images/appearance-${name}.png`));
@@ -264,8 +299,17 @@ test("portraits are square and all local page assets exist", () => {
   for (const match of html.matchAll(/(?:src|href)="(\.\/[^"?]+)(?:\?[^"]*)?"/g)) {
     assert.ok(fs.existsSync(path.join(root, "dist", match[1])), match[1]);
   }
-  assert.match(html, /styles\.css\?v=20261002-1/);
-  assert.match(html, /app\.js\?v=20261002-1/);
+  for (const name of ["human", "dragon", "merfolk", "oni", "catfolk", "underground", "skyfolk", "demon"]) {
+    const source = path.join(root, `assets/images/races/${name}.png`);
+    const served = path.join(root, `dist/assets/images/races/${name}.webp`);
+    assert.ok(fs.existsSync(source));
+    const webp = fs.readFileSync(served);
+    assert.equal(webp.toString("ascii", 0, 4), "RIFF");
+    assert.equal(webp.toString("ascii", 8, 12), "WEBP");
+    assert.ok(webp.length < fs.statSync(source).size);
+  }
+  assert.match(html, /styles\.css\?v=20261002-2/);
+  assert.match(html, /app\.js\?v=20261002-2/);
 });
 
 test("appearance has one neutral theme, square borderless portraits and narrow-screen navigation", () => {
