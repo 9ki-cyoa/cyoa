@@ -322,8 +322,8 @@ test("portraits are square and all local page assets exist", () => {
     assert.equal(webp.toString("ascii", 8, 12), "WEBP");
     assert.ok(webp.length < fs.statSync(source).size);
   }
-  assert.match(html, /styles\.css\?v=20261002-2/);
-  assert.match(html, /app\.js\?v=20261002-4/);
+  assert.match(html, /styles\.css\?v=20261002-3/);
+  assert.match(html, /app\.js\?v=20261002-5/);
 });
 
 test("appearance has one neutral theme, square borderless portraits and narrow-screen navigation", () => {
@@ -337,6 +337,9 @@ test("appearance has one neutral theme, square borderless portraits and narrow-s
   assert.match(appearance, /@media \(max-width: 380px\)/);
   assert.match(appearance, /\.choice-actions > \.return-button \{\s*width: 100%;/);
   assert.match(appearance, /prefers-reduced-motion/);
+  const raceImageStyle = css.match(/\.race-image \{([^}]+)\}/)[1];
+  assert.match(raceImageStyle, /height: auto;/);
+  assert.match(raceImageStyle, /background: #fff;/);
   for (const [, hex] of appearance.matchAll(/#([a-f0-9]{3,6})\b/gi)) {
     const expanded = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
     assert.equal(expanded.slice(0, 2), expanded.slice(2, 4), `Non-neutral color: #${hex}`);

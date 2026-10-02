@@ -232,8 +232,6 @@ function renderRaceChoices() {
     image.className = "race-image";
     image.src = race.image;
     image.alt = "";
-    image.width = 1000;
-    image.height = race.id === "underground" ? 1206 : 1333;
     image.decoding = "async";
     image.draggable = false;
     copy.className = "race-card-copy";
