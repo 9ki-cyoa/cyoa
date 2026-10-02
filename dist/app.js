@@ -42,12 +42,14 @@ const appearanceCategories = [
   {
     id: "aura",
     title: "분위기",
+    multiple: true,
     options: ["차가운", "따뜻한", "날카로운", "부드러운", "귀여운", "고고한", "음침한", "몽환적인", "위압적인", "순한", "활발한", "무심한"],
   },
   { id: "hair-length", title: "머리길이", options: ["삭발", "매우 짧음", "짧음", "중간", "김", "매우 김"] },
   {
     id: "hair-color",
     title: "머리색",
+    multiple: true,
     options: ["흑색", "짙은 갈색", "갈색", "밝은 갈색", "금색", "백금색", "백색", "은색", "적색", "주황색", "분홍색", "청색", "하늘색", "녹색", "보라색", "회색", "기타"],
   },
   {
@@ -58,6 +60,7 @@ const appearanceCategories = [
   {
     id: "eye-color",
     title: "눈색",
+    multiple: true,
     options: ["흑색", "갈색", "금색", "적색", "청색", "녹색", "회색", "은색", "보라색", "백색", "오드아이", "기타"],
   },
   {
@@ -135,6 +138,7 @@ function renderAppearanceChoices() {
     const legend = document.createElement("legend");
     const number = document.createElement("span");
     const title = document.createElement("span");
+    const multipleHint = document.createElement("small");
     const optionList = document.createElement("div");
 
     group.className = "choice-group";
@@ -146,6 +150,11 @@ function renderAppearanceChoices() {
     title.textContent = category.title;
     legend.tabIndex = -1;
     legend.append(number, title);
+    if (category.multiple) {
+      multipleHint.className = "choice-multiple-hint";
+      multipleHint.textContent = "여러 개 선택 가능";
+      legend.append(multipleHint);
+    }
 
     optionList.className = "choice-options";
     optionList.classList.toggle("choice-options--visual", Boolean(category.visual));
@@ -203,13 +212,17 @@ function updateAppearanceStep({ focus = false } = {}) {
   currentCategoryLabel.textContent = category.title;
   selectionProgress.textContent = `${String(currentAppearanceStep + 1).padStart(2, "0")} / ${String(appearanceCategories.length).padStart(2, "0")}`;
   previousAppearanceButton.disabled = currentAppearanceStep === 0;
-  nextAppearanceButton.disabled = !appearanceSelections.has(category.id);
+  nextAppearanceButton.disabled = !hasAppearanceSelection(category.id);
   nextAppearanceButton.textContent = isLastStep ? "외형 확정" : "다음";
 
   if (focus) {
     appearanceScreen.scrollTop = 0;
     choiceGroups.querySelector(".choice-group.is-current legend")?.focus({ preventScroll: true });
   }
+}
+
+function hasAppearanceSelection(categoryId) {
+  return (appearanceSelections.get(categoryId)?.length ?? 0) > 0;
 }
 
 function updateAudioControl(isPlaying) {
@@ -459,13 +472,32 @@ choiceGroups.addEventListener("click", (event) => {
   }
 
   const group = selectedButton.closest(".choice-group");
+  const category = appearanceCategories[Number(group.dataset.step)];
+  const selectedValues = new Set(appearanceSelections.get(category.id) || []);
+
+  if (category.multiple) {
+    if (selectedValues.has(selectedButton.dataset.value)) {
+      selectedValues.delete(selectedButton.dataset.value);
+    } else {
+      selectedValues.add(selectedButton.dataset.value);
+    }
+  } else {
+    selectedValues.clear();
+    selectedValues.add(selectedButton.dataset.value);
+  }
+
+  if (selectedValues.size > 0) {
+    appearanceSelections.set(category.id, [...selectedValues]);
+  } else {
+    appearanceSelections.delete(category.id);
+  }
+
   group.querySelectorAll(".choice-option").forEach((button) => {
-    const isSelected = button === selectedButton;
+    const isSelected = selectedValues.has(button.dataset.value);
     button.classList.toggle("is-selected", isSelected);
     button.setAttribute("aria-pressed", String(isSelected));
   });
 
-  appearanceSelections.set(group.dataset.category, selectedButton.dataset.value);
   updateAppearanceStep();
 });
 previousAppearanceButton.addEventListener("click", () => {
@@ -479,7 +511,7 @@ previousAppearanceButton.addEventListener("click", () => {
 nextAppearanceButton.addEventListener("click", () => {
   const category = appearanceCategories[currentAppearanceStep];
 
-  if (!appearanceSelections.has(category.id)) {
+  if (!hasAppearanceSelection(category.id)) {
     return;
   }
 

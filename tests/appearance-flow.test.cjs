@@ -198,6 +198,63 @@ test("gender image clicks, single selection, back navigation and re-entry preser
   assert.equal(currentGroup().querySelector(".choice-option").getAttribute("aria-pressed"), "true");
 });
 
+test("aura, hair color and eye color each allow several choices and can be cleared", () => {
+  const { query, click, currentGroup, begin } = setup();
+  const next = query('[data-action="next-appearance"]');
+  const previous = query('[data-action="previous-appearance"]');
+  begin();
+
+  for (const category of ["gender", "body-type", "height", "impression"]) {
+    assert.equal(currentGroup().dataset.category, category);
+    const options = currentGroup().querySelectorAll(".choice-option");
+    click(options[0]);
+    if (category === "body-type") {
+      click(options[1]);
+      assert.equal(options[0].getAttribute("aria-pressed"), "false");
+      assert.equal(options[1].getAttribute("aria-pressed"), "true");
+    }
+    click(next);
+  }
+
+  for (const category of ["aura", "hair-color", "eye-color"]) {
+    if (category === "hair-color") {
+      click(currentGroup().querySelector(".choice-option")); // hair length
+      click(next);
+    }
+    if (category === "eye-color") {
+      click(currentGroup().querySelector(".choice-option")); // hair mix
+      click(next);
+    }
+
+    const group = currentGroup();
+    assert.equal(group.dataset.category, category);
+    assert.equal(group.querySelector(".choice-multiple-hint").textContent, "여러 개 선택 가능");
+    const [first, second, third] = group.querySelectorAll(".choice-option");
+    for (const button of [first, second, third]) click(button);
+    assert.equal(group.querySelectorAll(".choice-option.is-selected").length, 3);
+    assert.equal(next.disabled, false);
+
+    click(second);
+    assert.equal(second.getAttribute("aria-pressed"), "false");
+    assert.equal(group.querySelectorAll(".choice-option.is-selected").length, 2);
+    click(first);
+    click(third);
+    assert.equal(next.disabled, true);
+    click(next);
+    assert.equal(currentGroup(), group);
+
+    click(first);
+    click(third);
+    click(previous);
+    click(next);
+    assert.equal(currentGroup(), group);
+    assert.equal(first.getAttribute("aria-pressed"), "true");
+    assert.equal(third.getAttribute("aria-pressed"), "true");
+    assert.equal(second.getAttribute("aria-pressed"), "false");
+    click(next);
+  }
+});
+
 test("portraits are square and all local page assets exist", () => {
   for (const name of ["male", "female"]) {
     const png = fs.readFileSync(path.join(root, `dist/assets/images/appearance-${name}.png`));
@@ -207,8 +264,8 @@ test("portraits are square and all local page assets exist", () => {
   for (const match of html.matchAll(/(?:src|href)="(\.\/[^"?]+)(?:\?[^"]*)?"/g)) {
     assert.ok(fs.existsSync(path.join(root, "dist", match[1])), match[1]);
   }
-  assert.match(html, /styles\.css\?v=20261001-3/);
-  assert.match(html, /app\.js\?v=20261001-3/);
+  assert.match(html, /styles\.css\?v=20261002-1/);
+  assert.match(html, /app\.js\?v=20261002-1/);
 });
 
 test("appearance has one neutral theme, square borderless portraits and narrow-screen navigation", () => {

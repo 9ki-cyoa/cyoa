@@ -929,10 +929,19 @@ button {
 .choice-group legend {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.65rem;
   padding: 0 0.45rem;
   font-size: clamp(1.4rem, 2.2vw, 1.8rem);
   font-weight: 700;
+}
+
+.choice-multiple-hint {
+  margin-left: auto;
+  color: #555;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .choice-number {
