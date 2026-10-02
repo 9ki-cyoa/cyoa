@@ -588,7 +588,7 @@ raceCards.addEventListener("click", (event) => {
   confirmRaceButton.disabled = false;
 });
 document.querySelector('[data-action="return-appearance"]').addEventListener("click", () => {
-  currentAppearanceStep = appearanceCategories.length - 1;
+  currentAppearanceStep = hasAppearanceSelection("skin-color") ? appearanceCategories.length - 1 : 0;
   showScreen("appearance");
   updateAppearanceStep({ focus: true });
 });
